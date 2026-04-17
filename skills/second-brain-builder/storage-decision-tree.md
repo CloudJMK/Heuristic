@@ -6,7 +6,7 @@ Executed during **Step 4** of the Builder workflow. All file operations are MCP 
 
 | Server | Root path |
 |--------|-----------|
-| `obsidian` | `/mnt/d/29Neibolt_Drop` |
+| `vault` | `/mnt/d/29Neibolt_Drop` |
 | `gdrive` | `/mnt/g/Shared drives/CloudPacts` |
 | `filesystem` | WD/MyBook Inbox + audit log |
 
@@ -24,7 +24,7 @@ START
 │
 │   YES — Large binary
 │   ├─ filesystem:write_file(wd_path + artifact)
-│   ├─ obsidian:write_note(para_path + pointer_note.md)
+│   ├─ vault:write_note(para_path + pointer_note.md)
 │   │     # pointer contains: title, WD path, SHA256, provenance block
 │   └─ DONE
 │
@@ -33,7 +33,7 @@ START
 ├─ What is content_type?
 │
 │   CASE text_note
-│   ├─ obsidian:write_note(para_path + note.md)
+│   ├─ vault:write_note(para_path + note.md)
 │   │     # full markdown content in note body
 │   └─ DONE
 │
@@ -41,22 +41,22 @@ START
 │   ├─ gdrive:write_file(cloudpacts_path + artifact)
 │   │     ON FAILURE:
 │   │     ├─ filesystem:write_file(wd_path + artifact)      # overflow to WD
-│   │     └─ obsidian:write_note(00-Inbox/_alerts/ + alert-<date>.md)
+│   │     └─ vault:write_note(00-Inbox/_alerts/ + alert-<date>.md)
 │   │           # alert: failed path, timestamp, recommended action
-│   ├─ obsidian:write_note(para_path + index_note.md)
+│   ├─ vault:write_note(para_path + index_note.md)
 │   │     # index note: CloudPacts path (or WD path on overflow),
 │   │     #             title, ≤200-word summary, provenance block
 │   └─ DONE
 │
 │   CASE code_repo | binary_other
 │   ├─ filesystem:write_file(wd_path + artifact)
-│   ├─ obsidian:write_note(para_path + index_note.md)
+│   ├─ vault:write_note(para_path + index_note.md)
 │   │     # index note: repo slug, commit/release hash, source URI, provenance
 │   └─ DONE
 │
 │   CASE unknown / unresolved
 │   ├─ Set needs_review: true
-│   ├─ obsidian:write_note(04-Resources/ + note.md)
+│   ├─ vault:write_note(04-Resources/ + note.md)
 │   │     # default PARA: Resources
 │   └─ DONE
 ```
@@ -65,7 +65,7 @@ START
 
 ## Required fields in every output note
 
-Every branch must produce at least one Obsidian note written via `obsidian:write_note`:
+Every branch must produce at least one Obsidian note written via `vault:write_note`:
 
 ```yaml
 title: <canonical title>
@@ -77,7 +77,7 @@ provenance:
   source_uri: <url>
   hash_sha256: <hex>
   ingest_utc: <ISO-8601>
-  storage_location: obsidian|gdrive|wd
+  storage_location: vault|gdrive|wd
 needs_review: <true|false>
 ```
 

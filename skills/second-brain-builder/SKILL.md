@@ -2,7 +2,7 @@
 name: second-brain-builder
 description: Use this skill to watch the ingestion Inbox, classify every new item with confidence scoring, preserve provenance, and place knowledge into exactly one PARA location with Obsidian-native notes, links, tags, and MOC maintenance.
 mcp_servers:
-  - obsidian    # Vault read/write/move with wikilink and frontmatter awareness
+  - vault    # Vault read/write/move with wikilink and frontmatter awareness
   - gdrive      # Read/write to G:\Shared drives\CloudPacts (WSL: /mnt/g/Shared drives/CloudPacts)
   - filesystem  # WD/MyBook overflow and audit log writes
   - sqlite      # Deduplication index (canonical URI + SHA256)
@@ -23,7 +23,7 @@ You are a deterministic organizer for a PARA-based second brain. You transform I
 
 | Server | Tools used | Scope |
 |--------|-----------|-------|
-| `obsidian` | `read_note`, `write_note`, `move_note`, `search_notes`, `update_frontmatter`, `get_backlinks` | Obsidian vault at `/mnt/d/29Neibolt_Drop` |
+| `vault` | `read_note`, `write_note`, `move_note`, `search_notes`, `update_frontmatter`, `get_backlinks` | Obsidian vault at `/mnt/d/29Neibolt_Drop` |
 | `gdrive` | `read_file`, `write_file`, `move_file`, `list_directory` | CloudPacts shared drive at `/mnt/g/Shared drives/CloudPacts` |
 | `filesystem` | `write_file`, `read_file`, `list_directory` | WD/MyBook paths and audit log |
 | `sqlite` | `query`, `execute` | Dedup index at `/mnt/d/29Neibolt_Drop/.heuristic/dedup.sqlite` |
@@ -52,9 +52,9 @@ No row → proceed.
 
 ### Step 2 — Read item
 ```
-obsidian:read_note(inbox_item_path)
+vault:read_note(inbox_item_path)
 ```
-Parse YAML frontmatter. Malformed or missing required keys → write triage note via `obsidian:write_note` to `00-Inbox/_triage/` and continue.
+Parse YAML frontmatter. Malformed or missing required keys → write triage note via `vault:write_note` to `00-Inbox/_triage/` and continue.
 
 ### Step 3 — Classify
 Apply `classification-rubric.md` to determine:
@@ -71,16 +71,16 @@ Follow `storage-decision-tree.md` exactly. Routing is decided by `file_size_mb` 
 
 ### Step 5 — Write Obsidian note
 ```
-obsidian:write_note(para_path, note_content)
+vault:write_note(para_path, note_content)
 ```
 If path already exists, append `-v2` suffix and log — do not overwrite.
 
 ### Step 6 — Update MOC
 ```
-obsidian:search_notes(topic_slug)   # check if MOC exists
+vault:search_notes(topic_slug)   # check if MOC exists
 ```
-Exists → append link under correct section via `obsidian:write_note`.
-Missing → create new MOC in same PARA root via `obsidian:write_note`, backfill index links.
+Exists → append link under correct section via `vault:write_note`.
+Missing → create new MOC in same PARA root via `vault:write_note`, backfill index links.
 Never create duplicate MOCs for the same topic slug.
 
 ### Step 7 — Register dedup and audit
@@ -116,7 +116,7 @@ provenance:
   source_uri: <url>
   hash_sha256: <hex>
   ingest_utc: <ISO-8601>
-  storage_location: obsidian|gdrive|wd
+  storage_location: vault|gdrive|wd
 needs_review: false
 ---
 ```
@@ -139,13 +139,13 @@ Ambiguous items default to `Resources` with `needs_review: true`.
 - If regression drops (`macro-F1 < baseline - 0.02` or PARA accuracy `< 95%`), halt autonomous placement and enter review-only mode.
 
 ## Failure handling
-- Malformed Inbox item → `obsidian:write_note` to `00-Inbox/_triage/` with error metadata; continue.
+- Malformed Inbox item → `vault:write_note` to `00-Inbox/_triage/` with error metadata; continue.
 - `gdrive:write_file` failure → fall back to `filesystem:write_file` on WD path; write alert note to `00-Inbox/_alerts/`.
 - `sqlite` unavailable → skip dedup check, log warning in audit, continue (hash check will catch on next run).
 - Never halt the entire queue on a single-item failure.
 
 ## Security boundaries
-- `obsidian` server is root-scoped to `/mnt/d/29Neibolt_Drop` — path traversal rejected at server level.
+- `vault` server is root-scoped to `/mnt/d/29Neibolt_Drop` — path traversal rejected at server level.
 - `gdrive` server is root-scoped to `/mnt/g/Shared drives/CloudPacts` — same protection.
 - `filesystem` server is root-scoped to WD path and audit log directory.
 - No outbound network calls except via `fetch` server (Researcher only) and model/router.

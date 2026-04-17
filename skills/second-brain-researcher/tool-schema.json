@@ -17,41 +17,34 @@
       "type": "object",
       "required": ["themes", "keywords", "exclusions"],
       "properties": {
-        "themes": {"type": "array", "items": {"type": "string"}},
-        "keywords": {"type": "array", "items": {"type": "string"}},
-        "exclusions": {"type": "array", "items": {"type": "string"}},
-        "max_sources": {"type": "integer", "minimum": 1, "maximum": 100, "default": 15},
-        "target_captures": {"type": "integer", "minimum": 1, "maximum": 50, "default": 5}
-      }
+        "themes":     { "type": "array", "items": { "type": "string" } },
+        "keywords":   { "type": "array", "items": { "type": "string" } },
+        "exclusions": { "type": "array", "items": { "type": "string" } },
+        "max_sources":     { "type": "integer", "minimum": 1, "maximum": 100, "default": 15 },
+        "target_captures": { "type": "integer", "minimum": 1, "maximum": 50,  "default": 5  }
+      },
+      "additionalProperties": false
     },
     "destination_config": {
       "type": "object",
-      "required": ["obsidian_inbox", "gdrive_inbox", "wd_inbox"],
+      "required": ["obsidian_inbox", "wd_inbox"],
       "properties": {
-        "obsidian_inbox": {"type": "string"},
-        "gdrive_inbox": {"type": "string"},
-        "wd_inbox": {"type": "string"},
-        "binary_threshold_mb": {"type": "integer", "default": 50}
-      }
+        "obsidian_inbox":      { "type": "string", "description": "Absolute path — must match filesystem MCP server allowed root" },
+        "wd_inbox":            { "type": "string", "description": "Absolute path for binaries above threshold" },
+        "binary_threshold_mb": { "type": "integer", "default": 50 }
+      },
+      "additionalProperties": false
     },
     "routing_prefs": {
       "type": "object",
       "required": ["primary_model", "fallback_model", "max_tokens_per_item"],
       "properties": {
-        "primary_model": {"type": "string"},
-        "fallback_model": {"type": "string"},
-        "max_tokens_per_item": {"type": "integer", "minimum": 256},
-        "cost_ceiling_usd": {"type": "number", "minimum": 0}
-      }
-    },
-    "fetch_policy": {
-      "type": "object",
-      "properties": {
-        "respect_robots_txt": {"type": "boolean", "default": true},
-        "rate_limit_rps": {"type": "number", "minimum": 0.1, "default": 1.0},
-        "max_retries": {"type": "integer", "minimum": 0, "maximum": 10, "default": 3},
-        "enable_cache": {"type": "boolean", "default": true}
-      }
+        "primary_model":       { "type": "string" },
+        "fallback_model":      { "type": "string" },
+        "max_tokens_per_item": { "type": "integer", "minimum": 256 },
+        "cost_ceiling_usd":    { "type": "number",  "minimum": 0 }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false
